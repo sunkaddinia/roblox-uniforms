@@ -36,6 +36,18 @@ function logDiscordError(label, err) {
     console.error(`${label} | status: ${status ?? 'none'} | ${body}`);
 }
 
+// ---- Gateway login (only makes the bot show as online; /roles doesn't need it) ----
+const { Client, GatewayIntentBits } = require('discord.js');
+const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+client.on('debug', m => console.log('[gw]', m.replace(BOT_TOKEN, '***')));
+client.on('error', e => console.error('Gateway error:', e));
+client.once('clientReady', () => console.log(`Gateway online as ${client.user.tag}`));
+client.login(BOT_TOKEN).catch(e => console.error('Gateway login failed:', e));
+
+discord.get('/gateway/bot')
+    .then(r => console.log('Session limit:', JSON.stringify(r.data.session_start_limit)))
+    .catch(e => logDiscordError('gateway/bot failed', e));
+
 // ---- Startup self-check: tells you in the logs if Render can reach Discord ----
 (async () => {
     try {
